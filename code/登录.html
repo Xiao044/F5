@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - Time Bandage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind配置 - 与主界面保持一致 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#FF7D00',
+                        success: '#00B42A',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        dark: '#1D2129',
+                        'dark-2': '#4E5969',
+                        'dark-3': '#86909C',
+                        'light-1': '#F2F3F5',
+                        'light-2': '#E5E6EB',
+                        'light-3': '#C9CDD4',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="font-inter bg-light-1 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-xl shadow-card p-6 md:p-8 animate-fade-in">
+        <div class="text-center mb-8">
+            <div class="h-16 w-16 rounded-lg bg-primary flex items-center justify-center text-white mx-auto mb-4">
+                <i class="fa fa-lock text-2xl"></i>
+            </div>
+            <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-dark">账户登录</h2>
+            <p class="text-dark-3 mt-2">请输入您的账号信息</p>
+        </div>
+
+        <form id="loginForm" class="space-y-5">
+            <div class="space-y-2">
+                <label for="username" class="block text-sm font-medium text-dark-2">用户名</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa fa-user text-dark-3"></i>
+                    </div>
+                    <input type="text" id="username" name="username" required
+                        class="w-full pl-10 pr-4 py-3 rounded-lg border border-light-2 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                        placeholder="请输入用户名">
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label for="password" class="block text-sm font-medium text-dark-2">密码</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa fa-key text-dark-3"></i>
+                    </div>
+                    <input type="password" id="password" name="password" required
+                        class="w-full pl-10 pr-4 py-3 rounded-lg border border-light-2 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                        placeholder="请输入密码">
+                </div>
+            </div>
+
+            <div id="errorMessage" class="hidden text-danger text-sm py-2"><i class="fa fa-exclamation-circle mr-1"></i> 用户名或密码错误</div>
+
+            <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-lg transition-all flex items-center justify-center">
+                <span>登录</span>
+                <i class="fa fa-arrow-right ml-2"></i>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // 简单的前端验证（实际应用中需后端验证）
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // 预设的用户名和密码（实际应用中应从后端获取）
+        const validUsername = 'admin';
+        const validPassword = 'password';
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === validUsername && password === validPassword) {
+                // 登录成功，跳转到主界面
+                window.location.href = '主界面.html';
+            } else {
+                // 显示错误信息
+                errorMessage.classList.remove('hidden');
+                // 3秒后自动隐藏错误信息
+                setTimeout(() => {
+                    errorMessage.classList.add('hidden');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
