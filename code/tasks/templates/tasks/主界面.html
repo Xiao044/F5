@@ -227,7 +227,7 @@
             </nav>
             
             <div class="p-4 border-t border-light-2 mt-auto">
-                <a id="addTaskBtn" href="{% url 'add_task' %}" onclick="openAddTaskModal()" class="w-full bg-primary hover:bg-primary/90 text-white rounded-lg py-3 flex items-center justify-center transition-colors">
+                <a id="addTaskBtn" href="{% url 'add_task' %}" class="w-full bg-primary hover:bg-primary/90 text-white rounded-lg py-3 flex items-center justify-center transition-colors">
     <i class="fa fa-plus mr-2"></i>
     <span class="hidden md:inline">添加任务</span>
 </a>
@@ -719,82 +719,6 @@
             </div>
         </section>
     </main>
-    
-    <!-- 添加任务模态框 -->
-    <div id="addTaskModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center animate-fade-in">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md animate-slide-up">
-            <div class="p-5 border-b border-light-2 flex items-center justify-between">
-                <h3 class="font-semibold text-dark">添加新任务</h3>
-                <button id="closeTaskModalBtn" class="p-1.5 rounded-lg text-dark-3 hover:bg-light-2 transition-colors">
-                    <i class="fa fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="p-5">
-                <form id="addTaskForm">
-                    <div class="mb-4">
-                        <label for="taskTitle" class="block text-sm font-medium text-dark mb-1">任务标题 <span class="text-danger">*</span></label>
-                        <input type="text" id="taskTitle" class="w-full px-3 py-2 rounded-lg border border-light-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="输入任务标题" required>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="taskDescription" class="block text-sm font-medium text-dark mb-1">任务描述</label>
-                        <textarea id="taskDescription" rows="3" class="w-full px-3 py-2 rounded-lg border border-light-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="输入任务描述"></textarea>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label for="taskDueDate" class="block text-sm font-medium text-dark mb-1">截止日期</label>
-                            <input type="date" id="taskDueDate" class="w-full px-3 py-2 rounded-lg border border-light-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-                        </div>
-                        
-                        <div>
-                            <label for="taskPriority" class="block text-sm font-medium text-dark mb-1">优先级</label>
-                            <select id="taskPriority" class="w-full px-3 py-2 rounded-lg border border-light-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-                                <option value="low">低</option>
-                                <option value="medium" selected>中</option>
-                                <option value="high">高</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-dark mb-1">任务分类</label>
-                        <div class="flex flex-wrap gap-2">
-                            <label class="flex items-center space-x-1 px-3 py-1.5 rounded-full border border-light-2 cursor-pointer hover:bg-light-1 transition-colors">
-                                <input type="radio" name="taskCategory" value="work" class="h-4 w-4 text-primary" checked>
-                                <span>工作</span>
-                            </label>
-                            <label class="flex items-center space-x-1 px-3 py-1.5 rounded-full border border-light-2 cursor-pointer hover:bg-light-1 transition-colors">
-                                <input type="radio" name="taskCategory" value="study" class="h-4 w-4 text-primary">
-                                <span>学习</span>
-                            </label>
-                            <label class="flex items-center space-x-1 px-3 py-1.5 rounded-full border border-light-2 cursor-pointer hover:bg-light-1 transition-colors">
-                                <input type="radio" name="taskCategory" value="life" class="h-4 w-4 text-primary">
-                                <span>生活</span>
-                            </label>
-                            <label class="flex items-center space-x-1 px-3 py-1.5 rounded-full border border-light-2 cursor-pointer hover:bg-light-1 transition-colors">
-                                <input type="radio" name="taskCategory" value="personal" class="h-4 w-4 text-primary">
-                                <span>个人</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="flex items-center space-x-2 text-sm font-medium text-dark cursor-pointer">
-                            <input type="checkbox" class="h-4 w-4 text-primary">
-                            <span>设置提醒</span>
-                        </label>
-                    </div>
-                    
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" id="cancelAddTaskBtn" class="px-4 py-2 rounded-lg border border-light-2 text-dark hover:bg-light-1 transition-colors">取消</button>
-                        <button type="submit" class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors">添加任务</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
     
     <!-- 任务详情模态框 -->
     <div id="taskDetailModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center animate-fade-in">
