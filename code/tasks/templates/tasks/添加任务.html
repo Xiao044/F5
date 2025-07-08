@@ -249,7 +249,8 @@
                 
                 <!-- 按钮区域 -->
                 <div class="flex space-x-4 pt-3">
-                    <button type="button" id="cancelBtn" class="flex-1 px-6 py-3 border border-light-2 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
+                    <!-- 假设取消按钮代码 -->
+                    <button type="button" onclick="window.location.href='main_page'" class="flex-1 px-6 py-3 border border-light-2 rounded-lg text-dark-2 hover:bg-light-1 transition-colors flex items-center justify-center">
                         <i class="fa fa-times mr-2"></i>取消
                     </button>
                     <button type="submit" class="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
@@ -316,11 +317,6 @@
             populateDays();
         });
         
-        // 取消按钮事件
-        document.getElementById('cancelBtn').addEventListener('click', () => {
-            window.location.href = '主界面.html';
-        });
-        
         // 表单提交事件
         document.getElementById('addTaskForm').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -330,7 +326,8 @@
             const year = document.getElementById('dueYear').value;
             const month = document.getElementById('dueMonth').value;
             const day = document.getElementById('dueDay').value;
-            const priority = document.getElementById('priority').value;
+            const prioritySelect = document.getElementById('priority');
+            const priority = prioritySelect.options[prioritySelect.selectedIndex].text;
             
             // 简单验证
             if (!taskName.trim()) {
@@ -352,7 +349,7 @@
             alert('任务添加成功！\n\n任务名称: ' + taskName + '\n截止时间: ' + year + '-' + month + '-' + day + '\n优先级: ' + priority);
             
             // 跳回主界面
-            window.location.href = '主界面.html';
+            window.location.href = 'main_page';
         });
     </script>
 </body>
