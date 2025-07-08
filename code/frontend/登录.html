@@ -275,8 +275,9 @@
                     throw new Error(data.message || '用户名或密码错误');
                 }
 
-                // 登录成功 - 保存token并跳转到主界面
+                // 登录成功 - 保存token和用户名并跳转到主界面
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('username', data.user.username); // ✅ 修改为正确路径
                 window.location.href = '主界面.html';
 
             } catch (error) {

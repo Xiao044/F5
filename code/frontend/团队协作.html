@@ -224,4 +224,21 @@
             </div>
         </aside>
         
-    <!-- ... existing code ...
+<script>
+    // 添加以下代码到文件末尾
+    document.addEventListener('DOMContentLoaded', function() {
+        const username = localStorage.getItem('username');
+        if (username) {
+            // 更新用户名显示
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            if (userMenuBtn) {
+                const usernameSpan = userMenuBtn.querySelector('span');
+                if (usernameSpan) {
+                    usernameSpan.textContent = username;
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>   <!-- ... existing code ...
