@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数据统计 - Deadline Chat App</title>
+    <title>聊天助手 - Time Bandage</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     
     <!-- Tailwind配置 -->
     <script>
@@ -134,13 +133,13 @@
                         </a>
                     </li>
                     <li>
-                        <a href="聊天助手.html" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
+                        <a href="聊天助手.html" class="flex items-center px-2 py-3 rounded-lg bg-primary/10 text-primary">
                             <i class="fa fa-comment-o text-lg w-8 text-center"></i>
                             <span class="hidden md:inline ml-2">聊天助手</span>
                         </a>
                     </li>
                     <li>
-                        <a href="数据统计.html" class="flex items-center px-2 py-3 rounded-lg bg-primary/10 text-primary">
+                        <a href="数据统计.html" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
                             <i class="fa fa-bar-chart text-lg w-8 text-center"></i>
                             <span class="hidden md:inline ml-2">数据统计</span>
                         </a>
@@ -224,4 +223,174 @@
             </div>
         </aside>
         
-    <!-- ... existing code ...
+        <!-- 聊天助手主内容区域 -->
+        <section class="flex-1 overflow-auto bg-light-1 p-4 md:p-6">
+            <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-card h-full flex flex-col">
+                <!-- 聊天头部 -->
+                <div class="border-b border-light-2 p-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <i class="fa fa-robot text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-semibold">智能聊天助手</h2>
+                            <p class="text-xs text-dark-3">在线 · 响应时间 < 1秒</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="p-2 text-dark-3 hover:text-primary transition-colors">
+                            <i class="fa fa-refresh"></i>
+                        </button>
+                        <button class="p-2 text-dark-3 hover:text-primary transition-colors">
+                            <i class="fa fa-cog"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 聊天消息区域 -->
+                <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-4 scrollbar-hide">
+                    <!-- 欢迎消息 -->
+                    <div class="flex items-start space-x-3 animate-fade-in">
+                        <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                            <i class="fa fa-robot"></i>
+                        </div>
+                        <div class="max-w-[80%] bg-light-1 rounded-lg rounded-tl-none p-3">
+                            <p class="text-sm">你好！我是你的智能聊天助手，有什么可以帮助你的吗？无论是任务管理、时间规划还是学习问题，我都可以为你提供帮助。</p>
+                            <p class="text-xs text-dark-3 mt-1">09:30</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 示例消息 - 用户 -->
+                    <div class="flex items-start space-x-3 justify-end animate-fade-in">
+                        <div class="max-w-[80%] bg-primary text-white rounded-lg rounded-tr-none p-3">
+                            <p class="text-sm">帮我规划一下今天的学习任务</p>
+                            <p class="text-xs text-white/70 mt-1">09:31</p>
+                        </div>
+                        <div class="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white flex-shrink-0">
+                            <i class="fa fa-user"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- 示例消息 - 助手 -->
+                    <div class="flex items-start space-x-3 animate-fade-in">
+                        <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                            <i class="fa fa-robot"></i>
+                        </div>
+                        <div class="max-w-[80%] bg-light-1 rounded-lg rounded-tl-none p-3">
+                            <p class="text-sm">根据你的学习计划和截止日期，我为你推荐以下学习任务安排：</p>
+                            <ul class="text-sm mt-2 space-y-1 list-disc list-inside">
+                                <li>9:00-10:30 - 完成数学作业（优先级：高）</li>
+                                <li>10:45-12:00 - 复习英语单词（优先级：中）</li>
+                                <li>14:00-16:00 - 编程练习（优先级：高）</li>
+                                <li>16:15-17:30 - 阅读专业书籍（优先级：中）</li>
+                            </ul>
+                            <p class="text-xs text-dark-3 mt-1">09:31</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 输入区域 -->
+                <div class="border-t border-light-2 p-4">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <button class="p-2 text-dark-3 hover:text-primary transition-colors">
+                            <i class="fa fa-smile-o"></i>
+                        </button>
+                        <button class="p-2 text-dark-3 hover:text-primary transition-colors">
+                            <i class="fa fa-paperclip"></i>
+                        </button>
+                        <button class="p-2 text-dark-3 hover:text-primary transition-colors">
+                            <i class="fa fa-image"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="messageInput" placeholder="输入消息..." class="flex-1 px-4 py-3 rounded-lg border border-light-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        <button id="sendMessageBtn" class="h-11 w-11 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary/90 transition-colors">
+                            <i class="fa fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <script>
+        // 用户菜单切换
+        document.getElementById('userMenuBtn').addEventListener('click', function() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        });
+        
+        // 点击其他区域关闭用户菜单
+        document.addEventListener('click', function(event) {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userMenu = document.getElementById('userMenu');
+            if (!userMenuBtn.contains(event.target) && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+        
+        // 聊天功能
+        document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                const chatMessages = document.getElementById('chatMessages');
+                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                // 添加用户消息
+                const userMessageHTML = `
+                    <div class="flex items-start space-x-3 justify-end animate-fade-in">
+                        <div class="max-w-[80%] bg-primary text-white rounded-lg rounded-tr-none p-3">
+                            <p class="text-sm">${message}</p>
+                            <p class="text-xs text-white/70 mt-1">${time}</p>
+                        </div>
+                        <div class="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white flex-shrink-0">
+                            <i class="fa fa-user"></i>
+                        </div>
+                    </div>
+                `;
+                chatMessages.insertAdjacentHTML('beforeend', userMessageHTML);
+                
+                // 清空输入框
+                input.value = '';
+                
+                // 滚动到底部
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // 模拟助手回复
+                setTimeout(() => {
+                    const assistantResponses = [
+                        "感谢你的消息！我正在处理你的请求，请稍候...",
+                        "这个问题很有趣，让我为你详细解答...",
+                        "根据你提供的信息，我建议你...",
+                        "我明白了，让我们一起解决这个问题。首先..."
+                    ];
+                    const randomResponse = assistantResponses[Math.floor(Math.random() * assistantResponses.length)];
+                    
+                    const assistantMessageHTML = `
+                        <div class="flex items-start space-x-3 animate-fade-in">
+                            <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                <i class="fa fa-robot"></i>
+                            </div>
+                            <div class="max-w-[80%] bg-light-1 rounded-lg rounded-tl-none p-3">
+                                <p class="text-sm">${randomResponse}</p>
+                                <p class="text-xs text-dark-3 mt-1">${time}</p>
+                            </div>
+                        </div>
+                    `;
+                    chatMessages.insertAdjacentHTML('beforeend', assistantMessageHTML);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
