@@ -24,3 +24,12 @@ mongoose.connect(process.env.MONGODB_URI)
     });
   })
   .catch(err => console.error('数据库连接失败:', err));
+
+// ... existing code ...
+
+// 添加根路径测试路由
+app.get('/', (req, res) => {
+res.send('服务器运行正常！请访问 API 接口：\n- /api/users/register (注册)\n- /api/users/login (登录)\n- /api/tasks (任务列表)');
+});
+
+// ... existing code ...
