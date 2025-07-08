@@ -1,15 +1,16 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
+const cors = require('cors'); // 只保留这一行cors引入
 const userRoutes = require('./routes/users');
 const taskRoutes = require('./routes/tasks');
 
 const app = express();
 
 // 中间件
-app.use(cors());
+app.use(cors()); // 只保留这一行cors使用
 app.use(express.json());
+app.use(express.static('../frontend')); // 添加静态文件服务
 
 // 路由
 app.use('/api/users', userRoutes);
