@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login  # 添加这行导入
 
 # Create your views here.
 
@@ -24,6 +25,23 @@ def add_task(request):
     return render(request, 'tasks/添加任务.html')
 
 def login(request):
+    if request.method == 'POST':
+        # 获取表单数据
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        # 验证用户
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            # 登录成功，重定向到主界面
+            login(request, user)
+            return redirect('main_page')
+        else:
+            # 登录失败，显示错误信息
+            return render(request, 'tasks/登录.html', {'error_message': '用户名或密码不正确'})
+    
+    # GET请求，显示登录表单
     return render(request, 'tasks/登录.html')
 
 def chat_assistant(request):
