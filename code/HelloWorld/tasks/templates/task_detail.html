@@ -1,0 +1,180 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务详情</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 使任务列表在页面高度较大时可滚动 */
+        .task-list-container {
+            max-height: 80vh; /* 限制最大高度 */
+            overflow-y: auto; /* 启用垂直滚动 */
+        }
+    </style>
+</head>
+<body class="font-inter bg-light-2 text-dark min-h-screen flex flex-col">
+
+    <!-- 页头部分 -->
+    <header class="bg-white shadow-md z-30 relative">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <!-- 返回键 -->
+                <a href="{% url 'task_list' %}" class="text-blue-500 text-xl mr-4">
+                    <i class="fa fa-arrow-left"></i> 返回
+                </a>
+
+                <!-- 图标 -->
+                <div class="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+                    <img src="{% static 'tasks/Time_Bandage.png' %}" alt="任务图标" class="h-8 w-8 object-contain">
+                </div>
+
+                <h1 class="text-xl font-bold text-[#365c9b]">任务详情</h1>
+            </div>
+
+            <!-- 用户头像和通知 -->
+            <div class="flex items-center space-x-4">
+                <i class="fa fa-bell text-xl text-gray-500"></i>
+                <span class="text-xs text-gray-400">3</span>  <!-- 假设是通知数量 -->
+                <img src="{% static 'tasks/profile-avatar.png' %}" alt="用户头像" class="h-8 w-8 rounded-full border border-gray-300">
+            </div>
+        </div>
+    </header>
+
+    <!-- 主体内容 -->
+    <main class="flex-1 p-6 bg-light-2">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- 标题和图表 -->
+            <div class="flex items-center mb-6">
+                <!-- 图表图标 -->
+                <div class="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary mr-4">
+                    <i class="fa fa-chart-bar text-xl"></i>
+                </div>
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark">任务列表</h2>
+            </div>
+
+            <!-- 任务列表容器 -->
+            <div class="task-list-container">
+                <!-- 待办任务 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    {% for task in pending_tasks %}
+                    <div class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                        <h3 class="text-xl font-semibold text-dark mb-4">{{ task.name }}</h3>
+
+                        <!-- 任务优先级和状态 -->
+                        <div class="flex items-center space-x-2 mb-4">
+                            <span class="text-sm text-gray-500">优先级:</span>
+                            {% if task.priority == 3 %}
+                                <span class="px-2 py-1 rounded-md text-white bg-red-500">高</span>
+                            {% elif task.priority == 2 %}
+                                <span class="px-2 py-1 rounded-md text-white bg-yellow-500">中</span>
+                            {% else %}
+                                <span class="px-2 py-1 rounded-md text-white bg-green-500">低</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- 任务描述 -->
+                        <p class="text-sm text-dark-3 mb-3 line-clamp-3">{{ task.description|default:"无描述" }}</p>
+
+                        <!-- 截止时间 -->
+                        <div class="text-xs text-dark-3 mb-3">
+                            <i class="fa fa-clock-o mr-1"></i> 截止: {{ task.deadline|date:"Y-m-d H:i" }}
+                        </div>
+
+                        <!-- 完成任务按钮 -->
+                        <form method="POST" action="{% url 'complete_task' task.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-full">
+                                完成
+                            </button>
+                        </form>
+
+                        <!-- 删除任务按钮 -->
+                        <form method="POST" action="{% url 'delete_task' task.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-full mt-2">
+                                删除
+                            </button>
+                        </form>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-10 text-dark-3">
+                        <i class="fa fa-inbox text-3xl mb-2 opacity-50"></i>
+                        <p>暂无待办任务</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- 逾期任务 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    {% for task in overdue_tasks %}
+                    <div class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                        <h3 class="text-xl font-semibold text-dark mb-4">{{ task.name }}</h3>
+                        
+                        <!-- 逾期标志 -->
+                        <div class="text-red-500 text-sm">
+                            逾期: {{ task.deadline|date:"Y-m-d H:i" }} (已逾期 {{ task.deadline|date:"Y-m-d H:i" | time_until }} )
+                        </div>
+
+                        <p class="text-sm text-dark-3 mb-3 line-clamp-3">{{ task.description|default:"无描述" }}</p>
+                        <div class="text-xs text-dark-3 mb-3">
+                            <i class="fa fa-clock-o mr-1"></i> 截止: {{ task.deadline|date:"Y-m-d H:i" }}
+                        </div>
+
+                        <form method="POST" action="{% url 'complete_task' task.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-full">
+                                完成
+                            </button>
+                        </form>
+
+                        <form method="POST" action="{% url 'delete_task' task.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-full mt-2">
+                                删除
+                            </button>
+                        </form>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-10 text-dark-3">
+                        <i class="fa fa-calendar-times-o text-3xl mb-2 opacity-50"></i>
+                        <p>暂无逾期任务</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- 已完成任务 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    {% for task in completed_tasks %}
+                    <div class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                        <h3 class="text-xl font-semibold text-dark mb-4">{{ task.name }}</h3>
+
+                        <p class="text-sm text-dark-3 mb-3 line-clamp-3 opacity-70">{{ task.description|default:"无描述" }}</p>
+                        <div class="text-xs text-dark-3 mb-3 opacity-70">
+                            <i class="fa fa-check-circle mr-1"></i> 完成时间: {{ task.completed_at|date:"Y-m-d H:i" }}
+                        </div>
+
+                        <form method="POST" action="{% url 'delete_task' task.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-full mt-2">
+                                删除
+                            </button>
+                        </form>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-10 text-dark-3">
+                        <i class="fa fa-check-square-o text-3xl mb-2 opacity-50"></i>
+                        <p>暂无已完成任务</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
