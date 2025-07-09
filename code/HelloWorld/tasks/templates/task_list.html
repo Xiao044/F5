@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Bandage - 任务列表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+   
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#FF7D00',
+                        success: '#00B42A',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        dark: '#1D2129',
+                        'dark-2': '#4E5969',
+                        'dark-3': '#86909C',
+                        'light-1': '#F2F3F5',
+                        'light-2': '#E5E6EB',
+                        'light-3': '#C9CDD4',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 4px 20px rgba(0, 0, 0, 0.08)',
+                        'card-hover': '0 8px 30px rgba(0, 0, 0, 0.12)',
+                        'dropdown': '0 10px 30px rgba(0, 0, 0, 0.1)',
+                    }
+                },
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+            .animate-slide-up {
+                animation: slideUp 0.3s ease-out;
+            }
+            .animate-pulse-soft {
+                animation: pulseSoft 2s infinite;
+            }
+            .task-progress {
+                height: 6px;
+                border-radius: 3px;
+                overflow: hidden;
+            }
+            .task-progress-bar {
+                height: 100%;
+                transition: width 0.5s ease;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes pulseSoft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="font-inter bg-light-1 text-dark min-h-screen flex flex-col">
+    <!-- 顶部导航栏 - 与主界面保持一致 -->
+    <header class="bg-white shadow-sm z-30 relative">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="h-9 w-9 rounded-lg bg-primary flex items-center justify-center text-white">
+                    <img src="{% static 'tasks/Time_Bandage.png' %}" alt="软件图标" class="h-full w-full object-contain">
+                </div>
+                <h1 class="text-xl font-bold text-[#365c9b]">Time Bandage</h1>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button class="relative p-2 text-dark-3 hover:text-primary transition-colors">
+                    <i class="fa fa-bell-o text-lg"></i>
+                    <span class="absolute top-1 right-1 h-4 w-4 rounded-full bg-danger flex items-center justify-center text-white text-xs">3</span>
+                </button>
+                
+                <div class="relative">
+                    <button id="userMenuBtn" class="flex items-center space-x-2 focus:outline-none">
+                        <img src="https://picsum.photos/id/1005/200/200" alt="用户头像" class="h-8 w-8 rounded-full object-cover border-2 border-primary">
+                        <span class="hidden md:inline text-sm font-medium">张明</span>
+                        <i class="fa fa-angle-down text-dark-3"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <main class="flex-1 p-4 md:p-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- 页面标题 -->
+            <div class="mb-6 animate-fade-in">
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark mb-2">任务列表</h2>
+                <p class="text-dark-3">管理和跟踪您的所有任务</p>
+            </div>
+
+            <!-- 图表区域 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-xl p-5 shadow-card hover:shadow-card-hover transition-shadow animate-fade-in">
+                    <h3 class="font-semibold text-dark mb-4">任务优先级分布</h3>
+                    <div class="h-64">
+                        <canvas id="taskPriorityChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-5 shadow-card hover:shadow-card-hover transition-shadow animate-fade-in" style="animation-delay: 0.1s">
+                    <h3 class="font-semibold text-dark mb-4">拖延损失统计</h3>
+                    <div class="h-64">
+                        <canvas id="lifeLossChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 并排容器 -->
+            <div class="flex gap-6 mb-8">
+                <!-- 添加任务表单 -->
+                <div class="flex-1 bg-white rounded-xl p-5 shadow-card hover:shadow-card-hover transition-shadow animate-slide-up">
+                    <h2 class="text-lg font-semibold text-dark mb-4">添加新任务</h2>
+                    <form method="post" class="space-y-4">
+                        {% csrf_token %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label for="id_name" class="block text-sm font-medium text-dark-2">任务名称</label>
+                                <input type="text" name="name" id="id_name" required
+                                    class="w-full px-4 py-3 rounded-lg border border-light-2 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                    placeholder="输入任务名称">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="id_deadline" class="block text-sm font-medium text-dark-2">截止日期</label>
+                                <input type="datetime-local" name="deadline" id="id_deadline" required
+                                    class="w-full px-4 py-3 rounded-lg border border-light-2 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="id_description" class="block text-sm font-medium text-dark-2">任务描述</label>
+                            <textarea name="description" id="id_description" rows="3"
+                                class="w-full px-4 py-3 rounded-lg border border-light-2 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                placeholder="输入任务描述"></textarea>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="id_priority" class="block text-sm font-medium text-dark-2">优先级</label>
+                            <select name="priority" id="id_priority"
+                                class="w-full px-4 py-3 rounded-lg border border-light-2 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                                <option value="1">低</option>
+                                <option value="2">中</option>
+                                <option value="3">高</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-lg transition-all flex items-center justify-center">
+                            <i class="fa fa-plus mr-2"></i>
+                            <span>保存任务</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 任务列表区域 -->
+                <div class="flex-1 overflow-y-auto max-h-[600px]">
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-6">
+                        <!-- 待办任务 -->
+                        <div class="bg-white rounded-xl shadow-card hover:shadow-card-hover transition-shadow animate-slide-up" style="animation-delay: 0.1s">
+                            <div class="p-5 border-b border-light-2">
+                                <h3 class="font-semibold text-dark flex items-center">
+                                    <span class="h-3 w-3 rounded-full bg-warning mr-2"></span>
+                                    待办任务
+                                    <span class="ml-2 text-xs bg-light-2 px-2 py-1 rounded-full text-dark-3">{{ pending_tasks|length }}</span>
+                                </h3>
+                            </div>
+                            <div class="p-4 max-h-[500px] overflow-y-auto scrollbar-hide space-y-3">
+                                {% for task in pending_tasks %}
+                                <div class="p-3 bg-light-1 rounded-lg border border-light-2 hover:border-primary/30 transition-colors">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h4 class="font-medium text-dark">{{ task.name }}</h4>
+                                        <span class="text-xs {% if task.priority == 3 %}bg-danger/10 text-danger{% elif task.priority == 2 %}bg-warning/10 text-warning{% else %}bg-success/10 text-success{% endif %} px-2 py-1 rounded-full">
+                                            {{ task.get_priority_display }}
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-dark-3 mb-3 line-clamp-2">{{ task.description|default:"无描述" }}</p>
+                                    <div class="text-xs text-dark-3 mb-3">
+                                        <i class="fa fa-clock-o mr-1"></i> 截止: {{ task.deadline|date:"Y-m-d H:i" }}
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <form action="{% url 'complete_task' task.id %}" method="post" class="flex-1">
+                                            {% csrf_token %}
+                                            <button type="submit" class="w-full bg-success hover:bg-success/90 text-white text-sm py-2 rounded-lg transition-colors">
+                                                <i class="fa fa-check mr-1"></i> 完成
+                                            </button>
+                                        </form>
+                                        <form action="{% url 'delete_task' task.id %}" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" onclick="return confirm('确定要删除吗？')" class="bg-light-2 hover:bg-light-3 text-dark-3 text-sm py-2 px-3 rounded-lg transition-colors">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="text-center py-10 text-dark-3">
+                                    <i class="fa fa-inbox text-3xl mb-2 opacity-50"></i>
+                                    <p>暂无待办任务</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 任务状态统计 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-xl p-5 shadow-card hover:shadow-card-hover transition-shadow animate-fade-in">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-dark-3 text-sm">总任务</p>
+                            <h3 class="text-2xl font-bold mt-1">{{ total_tasks }}</h3>
+                            <p class="text-success text-xs mt-2 flex items-center">
+                                <i class="fa fa-arrow-up mr-1"></i> 比上周增长 12%
+                            </p>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                            <i class="fa fa-tasks text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 shadow-card hover:shadow-card-hover transition-shadow animate-fade-in" style="animation-delay: 0.1s">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-dark-3 text-sm">进行中</p>
+                            <h3 class="text-2xl font-bold mt-1">{{ pending_tasks|length }}</h3>
+                            <p class="text-danger text-xs mt-2 flex items-center">
+                                <i class="fa fa-arrow-down mr-1"></i> 比上周减少 5%
+                            </p>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+                            <i class="fa fa-spinner text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 shadow-card hover:shadow-card-hover transition-shadow animate-fade-in" style="animation-delay: 0.2s">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-dark-3 text-sm">已完成</p>
+                            <h3 class="text-2xl font-bold mt-1">{{ completed_tasks|length }}</h3>
+                            <p class="text-success text-xs mt-2 flex items-center">
+                                <i class="fa fa-arrow-up mr-1"></i> 比上周增长 23%
+                            </p>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-success/10 flex items-center justify-center text-success">
+                            <i class="fa fa-check-circle text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 shadow-card hover:shadow-card-hover transition-shadow animate-fade-in" style="animation-delay: 0.3s">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-dark-3 text-sm">已逾期</p>
+                            <h3 class="text-2xl font-bold mt-1">{{ overdue_tasks|length }}</h3>
+                            <p class="text-dark-3 text-xs mt-2 flex items-center">
+                                <i class="fa fa-minus mr-1"></i> 与上周持平
+                            </p>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-danger/10 flex items-center justify-center text-danger">
+                            <i class="fa fa-exclamation-triangle text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            
+
+            <!-- 任务列表区域 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 待办任务 -->
+                <div class="bg-white rounded-xl shadow-card hover:shadow-card-hover transition-shadow animate-slide-up" style="animation-delay: 0.1s">
+                    <div class="p-5 border-b border-light-2">
+                        <h3 class="font-semibold text-dark flex items-center">
+                            <span class="h-3 w-3 rounded-full bg-warning mr-2"></span>
+                            待办任务
+                            <span class="ml-2 text-xs bg-light-2 px-2 py-1 rounded-full text-dark-3">{{ pending_tasks|length }}</span>
+                        </h3>
+                    </div>
+                    <div class="p-4 max-h-[500px] overflow-y-auto scrollbar-hide space-y-3">
+                        {% for task in pending_tasks %}
+                        <div class="p-3 bg-light-1 rounded-lg border border-light-2 hover:border-primary/30 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-medium text-dark">{{ task.name }}</h4>
+                                <span class="text-xs {% if task.priority == 3 %}bg-danger/10 text-danger{% elif task.priority == 2 %}bg-warning/10 text-warning{% else %}bg-success/10 text-success{% endif %} px-2 py-1 rounded-full">
+                                    {{ task.get_priority_display }}
+                                </span>
+                            </div>
+                            <p class="text-sm text-dark-3 mb-3 line-clamp-2">{{ task.description|default:"无描述" }}</p>
+                            <div class="text-xs text-dark-3 mb-3">
+                                <i class="fa fa-clock-o mr-1"></i> 截止: {{ task.deadline|date:"Y-m-d H:i" }}
+                            </div>
+                            <div class="flex space-x-2">
+                                <form action="{% url 'complete_task' task.id %}" method="post" class="flex-1">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-full bg-success hover:bg-success/90 text-white text-sm py-2 rounded-lg transition-colors">
+                                        <i class="fa fa-check mr-1"></i> 完成
+                                    </button>
+                                </form>
+                                <form action="{% url 'delete_task' task.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" onclick="return confirm('确定要删除吗？')" class="bg-light-2 hover:bg-light-3 text-dark-3 text-sm py-2 px-3 rounded-lg transition-colors">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-10 text-dark-3">
+                            <i class="fa fa-inbox text-3xl mb-2 opacity-50"></i>
+                            <p>暂无待办任务</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- 逾期任务 -->
+                <div class="bg-white rounded-xl shadow-card hover:shadow-card-hover transition-shadow animate-slide-up" style="animation-delay: 0.2s">
+                    <div class="p-5 border-b border-light-2">
+                        <h3 class="font-semibold text-dark flex items-center">
+                            <span class="h-3 w-3 rounded-full bg-danger mr-2"></span>
+                            逾期任务
+                            <span class="ml-2 text-xs bg-light-2 px-2 py-1 rounded-full text-dark-3">{{ overdue_tasks|length }}</span>
+                        </h3>
+                    </div>
+                    <div class="p-4 max-h-[500px] overflow-y-auto scrollbar-hide space-y-3">
+                        {% for task in overdue_tasks %}
+                        <div class="p-3 bg-light-1 rounded-lg border border-light-2 hover:border-danger/30 transition-colors animate-pulse-soft">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-medium text-dark">{{ task.name }}</h4>
+                                <span class="text-xs bg-danger/10 text-danger px-2 py-1 rounded-full">
+                                    已逾期
+                                </span>
+                            </div>
+                            <p class="text-sm text-dark-3 mb-3 line-clamp-2">{{ task.description|default:"无描述" }}</p>
+                            <div class="text-xs text-dark-3 mb-3">
+                                <i class="fa fa-clock-o mr-1"></i> 截止: {{ task.deadline|date:"Y-m-d H:i" }}
+                                <span class="ml-2 text-danger">(已逾期: {{ task.deadline|timesince }})</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <form action="{% url 'complete_task' task.id %}" method="post" class="flex-1">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-full bg-success hover:bg-success/90 text-white text-sm py-2 rounded-lg transition-colors">
+                                        <i class="fa fa-check mr-1"></i> 完成
+                                    </button>
+                                </form>
+                                <form action="{% url 'delete_task' task.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" onclick="return confirm('确定要删除吗？')" class="bg-light-2 hover:bg-light-3 text-dark-3 text-sm py-2 px-3 rounded-lg transition-colors">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-10 text-dark-3">
+                            <i class="fa fa-calendar-times-o text-3xl mb-2 opacity-50"></i>
+                            <p>暂无逾期任务</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- 已完成任务 -->
+                <div class="bg-white rounded-xl shadow-card hover:shadow-card-hover transition-shadow animate-slide-up" style="animation-delay: 0.3s">
+                    <div class="p-5 border-b border-light-2">
+                        <h3 class="font-semibold text-dark flex items-center">
+                            <span class="h-3 w-3 rounded-full bg-success mr-2"></span>
+                            已完成任务
+                            <span class="ml-2 text-xs bg-light-2 px-2 py-1 rounded-full text-dark-3">{{ completed_tasks|length }}</span>
+                        </h3>
+                    </div>
+                    <div class="p-4 max-h-[500px] overflow-y-auto scrollbar-hide space-y-3">
+                        {% for task in completed_tasks %}
+                        <div class="p-3 bg-light-1 rounded-lg border border-light-2 hover:border-success/30 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-medium text-dark line-through opacity-70">{{ task.name }}</h4>
+                                <span class="text-xs bg-success/10 text-success px-2 py-1 rounded-full">
+                                    已完成
+                                </span>
+                            </div>
+                            <p class="text-sm text-dark-3 mb-3 line-clamp-2 opacity-70">{{ task.description|default:"无描述" }}</p>
+                            <div class="text-xs text-dark-3 mb-3">
+                                <i class="fa fa-clock-o mr-1"></i> 截止: {{ task.deadline|date:"Y-m-d H:i" }}
+                            </div>
+                            <div class="text-xs text-dark-3 mb-3">
+                                <i class="fa fa-check-circle mr-1"></i> 完成于: {{ task.completed_at|date:"Y-m-d H:i" }}
+                            </div>
+                            <div class="flex justify-end">
+                                <form action="{% url 'delete_task' task.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" onclick="return confirm('确定要删除吗？')" class="bg-light-2 hover:bg-light-3 text-dark-3 text-sm py-2 px-3 rounded-lg transition-colors">
+                                        <i class="fa fa-trash"></i> 删除
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-10 text-dark-3">
+                            <i class="fa fa-check-square-o text-3xl mb-2 opacity-50"></i>
+                            <p>暂无已完成任务</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 图表初始化脚本 -->
+            <script>
+                // 获取统计数据
+                const priorityCounts = {
+                    high: {{ priority_counts.high }},
+                    medium: {{ priority_counts.medium }},
+                    low: {{ priority_counts.low }}
+                };
+                
+                // 创建图表
+                const ctx = document.getElementById('taskPriorityChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['高优先级', '中优先级', '低优先级'],
+                        datasets: [{
+                            data: [priorityCounts.high, priorityCounts.medium, priorityCounts.low],
+                            backgroundColor: ['#ff4444', '#ffdd44', '#44dd44'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false, // 新增：允许调整宽高比
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '任务优先级分布',
+                                font: {
+                                    size: 14 // 减小标题字体大小
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // 新增：生命损失图表
+                const lifeLossCtx = document.getElementById('lifeLossChart').getContext('2d');
+                new Chart(lifeLossCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['拖延损失'],
+                        datasets: [{
+                            label: '相当于损失的睡眠时间',
+                            data: [{{ lost_life_hours }}],
+                            backgroundColor: '#ff6b6b',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '小时'
+                                },
+                                ticks: {
+                                    precision: 1
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '拖延损失统计',
+                                font: {
+                                    size: 16,
+                                    weight: 'normal',
+                                    family: 'Segoe UI'
+                                },
+                                padding: {top: 10, bottom: 20}
+                            },
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            </script>
+            
+            <script>
+                // 添加任务表单提交动画
+                document.querySelector('.task-form form').addEventListener('submit', function(e) {
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.textContent;
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '保存中...';
+                
+                    // 模拟加载状态（实际项目中可移除）
+                    setTimeout(() => {
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    }, 800);
+                });
+            
+                // 任务项悬停效果增强
+                document.querySelectorAll('.task').forEach(task => {
+                    task.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-3px)';
+                        this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+                    });
+                    task.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0)';
+                        this.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+                    });
+                });
+            </script>
+</body>
+</html>
