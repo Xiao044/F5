@@ -271,7 +271,6 @@
         <div class="p-5">
             <div class="space-y-4">
                 <!-- 任务列表内容 -->
-                <h4 class="font-medium text-dark">待办任务</h4>
                 <div class="max-h-[500px] overflow-y-auto space-y-3" id="taskList">
                     {% for task in pending_tasks %}
                     <div class="p-3 bg-light-1 rounded-lg border border-light-2 hover:border-primary/30 transition-colors">
@@ -352,21 +351,113 @@ document.addEventListener('keydown', (e) => {
 
         
 
-    <!-- 已完成任务卡片 -->
-    <div class="relative p-6 bg-white shadow-card rounded-lg hover:shadow-card-hover transition-shadow">
-        <div class="flex items-start justify-between">
-            <div>
-                <p class="text-dark-3 text-sm">已完成</p>
-                <h3 class="text-2xl font-bold mt-1">{{ completed_tasks|length }}</h3>
-                <p class="text-success text-xs mt-2 flex items-center">
-                    <i class="fa fa-arrow-up mr-1"></i> 比上周增长 23%
-                </p>
-            </div>
-            <div class="h-12 w-12 rounded-lg bg-success/10 flex items-center justify-center text-success">
-                <i class="fa fa-check-circle text-xl"></i>
+ <!-- 已完成任务卡片 -->
+<div class="relative p-6 bg-white shadow-card rounded-lg hover:shadow-card-hover transition-shadow cursor-pointer" id="completedTasksCard">
+    <div class="flex items-start justify-between">
+        <div>
+            <p class="text-dark-3 text-sm">已完成</p>
+            <h3 class="text-2xl font-bold mt-1">{{ completed_tasks|length }}</h3>
+            <p class="text-success text-xs mt-2 flex items-center">
+                <i class="fa fa-arrow-up mr-1"></i> 比上周增长 23%
+            </p>
+        </div>
+        <div class="h-12 w-12 rounded-lg bg-success/10 flex items-center justify-center text-success">
+            <i class="fa fa-check-circle text-xl"></i>
+        </div>
+    </div>
+</div>
+
+<!-- 已完成任务弹窗 -->
+<div id="completedTasksModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center animate-fade-in">
+    <div class="bg-white rounded-xl shadow-dropdown w-full max-w-md mx-4 animate-slide-up">
+        <div class="p-5 border-b border-light-2 flex justify-between items-center">
+            <h4 class="font-semibold text-dark text-lg">已完成任务</h4>
+            <button id="closeCompletedTasksModal" class="text-dark-3 hover:text-danger transition-colors">
+                <i class="fa fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="p-5">
+            <div class="space-y-4">
+                <div class="max-h-[470px] overflow-y-auto scrollbar-hide space-y-3">
+                    <!-- 显示最多4个已完成任务 -->
+                    {% for task in completed_tasks|slice:":4" %}
+                    <div class="p-3 bg-light-1 rounded-lg border border-light-2 hover:border-success/30 transition-colors relative">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-medium text-dark line-through opacity-70">{{ task.name }}</h4>
+                            <span class="text-xs bg-success/10 text-success px-2 py-1 rounded-full">
+                                已完成
+                            </span>
+                        </div>
+                        <p class="text-sm text-dark-3 mb-3 line-clamp-2 opacity-70">{{ task.description|default:"无描述" }}</p>
+                        <div class="text-xs text-dark-3 mb-3">
+                            <i class="fa fa-clock-o mr-1"></i> 截止: {{ task.deadline|date:"Y-m-d H:i" }}
+                        </div>
+                        <div class="text-xs text-dark-3 mb-3">
+                            <i class="fa fa-check-circle mr-1"></i> 完成于: {{ task.completed_at|date:"Y-m-d H:i" }}
+                        </div>
+                        <!-- 删除任务按钮 -->
+                        <form action="{% url 'delete_task' task.id %}" method="post" class="absolute bottom-2 right-2">
+                            {% csrf_token %}
+                            <button type="submit" onclick="return confirm('确定要删除吗？')" class="bg-light-2 hover:bg-light-3 text-dark-3 text-sm py-2 px-3 rounded-lg transition-colors">
+                                <i class="fa fa-trash"></i> 删除
+                            </button>
+                        </form>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-10 text-dark-3">
+                        <i class="fa fa-check-square-o text-3xl mb-2 opacity-50"></i>
+                        <p>暂无已完成任务</p>
+                    </div>
+                    {% endfor %}
+                    <!-- 滚动条显示更多 -->
+                    {% if completed_tasks|length > 4 %}
+                    <p class="text-center text-sm text-dark-3">查看更多已完成任务...</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
+</div>
+
+
+
+
+<script>
+    // 已完成任务卡片点击事件
+    const completedTasksCard = document.getElementById('completedTasksCard');
+    const completedTasksModal = document.getElementById('completedTasksModal');
+    const closeCompletedTasksModal = document.getElementById('closeCompletedTasksModal');
+
+    // 打开已完成任务弹窗
+    completedTasksCard.addEventListener('click', () => {
+        completedTasksModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // 防止背景滚动
+    });
+
+    // 关闭已完成任务弹窗
+    closeCompletedTasksModal.addEventListener('click', () => {
+        completedTasksModal.classList.add('hidden');
+        document.body.style.overflow = ''; // 恢复背景滚动
+    });
+
+    // 点击模态框外部时关闭弹窗
+    completedTasksModal.addEventListener('click', (e) => {
+        if (e.target === completedTasksModal) {
+            completedTasksModal.classList.add('hidden');
+            document.body.style.overflow = ''; // 恢复背景滚动
+        }
+    });
+
+    // 按ESC键关闭弹窗
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !completedTasksModal.classList.contains('hidden')) {
+            completedTasksModal.classList.add('hidden');
+            document.body.style.overflow = ''; // 恢复背景滚动
+        }
+    });
+</script>
+
+
 
     <!-- 已逾期任务卡片 -->
     <div class="relative p-6 bg-white shadow-card rounded-lg hover:shadow-card-hover transition-shadow">
