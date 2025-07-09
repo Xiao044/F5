@@ -126,22 +126,7 @@
                 <p class="text-dark-3">管理和跟踪您的所有任务</p>
             </div>
 
-            <!-- 图表区域 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white rounded-xl p-5 shadow-card hover:shadow-card-hover transition-shadow animate-fade-in">
-                    <h3 class="font-semibold text-dark mb-4">任务优先级分布</h3>
-                    <div class="h-64">
-                        <canvas id="taskPriorityChart"></canvas>
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl p-5 shadow-card hover:shadow-card-hover transition-shadow animate-fade-in" style="animation-delay: 0.1s">
-                    <h3 class="font-semibold text-dark mb-4">拖延损失统计</h3>
-                    <div class="h-64">
-                        <canvas id="lifeLossChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
+            
             <!-- 并排容器 -->
             <div class="flex gap-6 mb-8">
                 <!-- 添加任务表单 -->
@@ -232,6 +217,20 @@
                                 {% endfor %}
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-xl p-5 shadow-card hover:shadow-card-hover transition-shadow animate-fade-in">
+                    <h3 class="font-semibold text-dark mb-4">任务优先级分布</h3>
+                    <div class="h-64">
+                        <canvas id="taskPriorityChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-5 shadow-card hover:shadow-card-hover transition-shadow animate-fade-in" style="animation-delay: 0.1s">
+                    <h3 id="delayLossTitle" class="font-semibold text-dark mb-4 cursor-pointer hover:text-primary transition-colors">拖延损失统计</h3>
+                    <div class="h-64">
+                        <canvas id="lifeLossChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -550,5 +549,70 @@
                     });
                 });
             </script>
+<!-- 拖延损失统计模态窗口 -->
+<div id="delayLossModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center animate-fade-in">
+    <div class="bg-white rounded-xl shadow-dropdown w-full max-w-md mx-4 animate-slide-up">
+        <div class="p-5 border-b border-light-2 flex justify-between items-center">
+            <h4 class="font-semibold text-dark text-lg">拖延损失统计详情</h4>
+            <button id="closeModalBtn" class="text-dark-3 hover:text-danger transition-colors">
+                <i class="fa fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="p-5">
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-dark-3">总拖延次数</span>
+                    <span class="font-medium">12次</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-dark-3">累计拖延时间</span>
+                    <span class="font-medium">36小时</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-dark-3">估计损失效率</span>
+                    <span class="font-medium text-danger">42%</span>
+                </div>
+                <div class="task-progress bg-light-2">
+                    <div class="task-progress-bar bg-danger" style="width: 42%"></div>
+                </div>
+                <p class="text-sm text-dark-3 mt-2">根据您的任务完成情况，拖延已导致约42%的效率损失。建议优先处理高优先级任务以减少损失。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 处理拖延损失统计模态窗口
+    const delayLossTitle = document.getElementById('delayLossTitle');
+    const delayLossModal = document.getElementById('delayLossModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    delayLossTitle.addEventListener('click', () => {
+        delayLossModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // 防止背景滚动
+    });
+
+    function closeModal() {
+        delayLossModal.classList.add('hidden');
+        document.body.style.overflow = ''; // 恢复背景滚动
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+    
+    // 点击模态窗口外部关闭
+    delayLossModal.addEventListener('click', (e) => {
+        if (e.target === delayLossModal) {
+            closeModal();
+        }
+    });
+
+    // 按ESC键关闭
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !delayLossModal.classList.contains('hidden')) {
+            closeModal();
+        }
+    });
+</script>
+
 </body>
 </html>
