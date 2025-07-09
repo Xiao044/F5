@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from .models import Task
 from .forms import TaskForm
+from datetime import datetime
 
 # 任务列表视图：展示任务创建表单和任务列表
 def task_list(request):
@@ -82,6 +83,19 @@ def task_detail(request):
     pending_tasks = Task.objects.filter(is_completed=False, deadline__gte=now)
     overdue_tasks = Task.objects.filter(is_completed=False, deadline__lt=now).order_by('deadline')
     completed_tasks = Task.objects.filter(is_completed=True).order_by('-completed_at')
+
+    # 确保 deadline 为 datetime 类型（如果它是字符串类型）
+    for task in pending_tasks:
+        if isinstance(task.deadline, str):
+            task.deadline = timezone.make_aware(datetime.strptime(task.deadline, '%Y-%m-%d %H:%M'))
+
+    for task in overdue_tasks:
+        if isinstance(task.deadline, str):
+            task.deadline = timezone.make_aware(datetime.strptime(task.deadline, '%Y-%m-%d %H:%M'))
+
+    for task in completed_tasks:
+        if isinstance(task.deadline, str):
+            task.deadline = timezone.make_aware(datetime.strptime(task.deadline, '%Y-%m-%d %H:%M'))
 
     return render(request, 'task_detail.html', {
         'pending_tasks': pending_tasks,
