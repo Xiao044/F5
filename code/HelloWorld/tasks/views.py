@@ -22,7 +22,7 @@ def task_list(request):
     overdue_tasks = Task.objects.filter(is_completed=False, deadline__lt=now).order_by('deadline')
     completed_tasks = Task.objects.filter(is_completed=True).order_by('-completed_at')
     
-    # 新增：计算逾期任务的生命损失时间（拖延时间的1/10）
+    # 计算逾期任务的生命损失时间（拖延时间的1/10）
     total_lost_life_seconds = 0
     for task in overdue_tasks:
         delay = now - task.deadline
@@ -31,19 +31,41 @@ def task_list(request):
     # 转换为小时（保留1位小数）
     lost_life_hours = round(total_lost_life_seconds / 3600, 1)
     
+    # 获取高、中、低优先级任务的数量
+    high_count = pending_tasks.filter(priority=3).count()
+    medium_count = pending_tasks.filter(priority=2).count()
+    low_count = pending_tasks.filter(priority=1).count()
+    
+    # 计算任务的总数量
+    total_tasks = high_count + medium_count + low_count
+    
+    # 计算每个优先级任务的比例
+    high_priority_ratio = (high_count / total_tasks) * 100 if total_tasks else 0
+    medium_priority_ratio = (medium_count / total_tasks) * 100 if total_tasks else 0
+    low_priority_ratio = (low_count / total_tasks) * 100 if total_tasks else 0
+
+    # 任务优先级分配建议
+    high_priority_advice = f"高优先级任务占 {high_priority_ratio:.2f}%，这些任务通常最紧急且最重要，建议优先处理。"
+    medium_priority_advice = f"中优先级任务占 {medium_priority_ratio:.2f}%，这些任务可以在完成高优先级任务后进行处理。"
+    low_priority_advice = f"低优先级任务占 {low_priority_ratio:.2f}%，这些任务可以在空闲时间或高优先级任务完成后处理。"
+
+    # 优先级计数
     priority_counts = {
-        'high': pending_tasks.filter(priority=3).count(),
-        'medium': pending_tasks.filter(priority=2).count(),
-        'low': pending_tasks.filter(priority=1).count()
+        'high': high_count,
+        'medium': medium_count,
+        'low': low_count
     }
     
     return render(request, 'task_list.html', {
-        'form': form, 
+        'form': form,
         'pending_tasks': pending_tasks,
         'overdue_tasks': overdue_tasks,
         'completed_tasks': completed_tasks,
         'priority_counts': priority_counts,
-        'lost_life_hours': lost_life_hours  # 传递生命损失数据
+        'lost_life_hours': lost_life_hours,  # 传递生命损失数据
+        'high_priority_advice': high_priority_advice,
+        'medium_priority_advice': medium_priority_advice,
+        'low_priority_advice': low_priority_advice,
     })
 
 # 添加任务视图：显示任务添加表单并处理提交
