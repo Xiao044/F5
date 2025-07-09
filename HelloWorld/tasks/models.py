@@ -12,6 +12,10 @@ class Task(models.Model):
     priority = models.IntegerField(choices=PRIORITY_CHOICES, default=2, verbose_name='重要级')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    # 新增：完成状态字段
+    is_completed = models.BooleanField(default=False, verbose_name='是否完成')
+    # 新增：完成时间字段
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name='完成时间')
 
     def __str__(self):
         return self.name

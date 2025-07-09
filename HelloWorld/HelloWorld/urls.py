@@ -16,10 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from tasks import views  # Update this line (将//改为#)
+from tasks import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.task_list, name='task_list'),
-    path('delete/<int:pk>/', views.delete_task, name='delete_task'),  # 添加删除路由
+    path('delete/<int:pk>/', views.delete_task, name='delete_task'),
+    # 新增：完成任务路由
+    path('complete/<int:pk>/', views.complete_task, name='complete_task'),
 ]

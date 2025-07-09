@@ -1,25 +1,170 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Deadline管理器</title>
+    <title>Time Bandage</title>
     <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .task-form { background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin-bottom: 30px; }
-        .task { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
-        .high-priority { border-left: 4px solid #ff4444; }
-        .medium-priority { border-left: 4px solid #ffdd44; }
-        .low-priority { border-left: 4px solid #44dd44; }
-        .task h3 { margin-top: 0; }
-        .task .deadline { color: #666; font-size: 0.9em; }
-        .priority { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.8em; color: white; }
-        .priority-high { background-color: #ff4444; }
-        .priority-medium { background-color: #ffdd44; color: black; }
-        .priority-low { background-color: #44dd44; }
+        /* 基础样式优化 */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: #f0f2f5; 
+            color: #333; 
+        }
+        h1, h2 { color: #2c3e50; }
+        h1 { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            color: #3498db; 
+            font-weight: 300; 
+            font-size: 2.2em; 
+        }
+        h2 { 
+            border-bottom: 2px solid #3498db; 
+            padding-bottom: 8px; 
+            margin-top: 0; 
+        }
+    
+        /* 任务表单美化 */
+        .task-form { 
+            background-color: white; 
+            padding: 25px; 
+            border-radius: 8px; 
+            margin-bottom: 30px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            transition: box-shadow 0.3s ease; 
+        }
+        .task-form:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    
+        /* 任务卡片样式优化 */
+        .task { 
+            background-color: white; 
+            padding: 15px; 
+            margin-bottom: 12px; 
+            border-radius: 6px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+            transition: transform 0.2s ease, box-shadow 0.2s ease; 
+        }
+        .task:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        }
+    
+        /* 优先级样式增强 */
+        .high-priority { border-left: 4px solid #e74c3c; } 
+        .medium-priority { border-left: 4px solid #f39c12; } 
+        .low-priority { border-left: 4px solid #2ecc71; } 
+        .priority { 
+            display: inline-block; 
+            padding: 4px 10px; 
+            border-radius: 15px; 
+            font-size: 0.8em; 
+            color: white; 
+            margin-right: 10px; 
+            font-weight: 500; 
+        }
+    
+        /* 按钮样式优化 */
+        button { 
+            background-color: #3498db; 
+            color: white; 
+            border: none; 
+            padding: 8px 15px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.9em; 
+            transition: background-color 0.2s ease, transform 0.1s ease; 
+            margin-right: 8px; 
+        }
+        button:hover { 
+            background-color: #2980b9; 
+            transform: translateY(-1px); 
+        }
+        button:active { transform: translateY(1px); }
+        button[type="submit"] { background-color: #2ecc71; }
+        button[type="submit"]:hover { background-color: #27ae60; }
+    
+        /* 区域样式优化 */
+        .section { 
+            margin-bottom: 30px; 
+            padding: 20px; 
+            background-color: white; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        }
+    
+        /* 逾期任务样式增强 */
+        .overdue-task { border-left: 4px solid #c0392b; } 
+        .overdue-text { 
+            color: #c0392b; 
+            font-weight: bold; 
+        }
+    
+        /* 已完成任务样式优化 */
+        .completed-task { 
+            text-decoration: line-through; 
+            color: #7f8c8d; 
+            background-color: #f8f9fa; 
+        }
+    
+        /* 图表容器优化 */
+        .charts-container { 
+            display: flex; 
+            gap: 20px; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+            margin: 30px 0; 
+        }
+        .chart-container { 
+            margin: 10px 0; 
+            max-width: 45%; 
+            min-width: 300px; 
+            background-color: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        }
+    
+        /* 表单元素美化 */
+        input, select, textarea { 
+            width: 100%; 
+            padding: 10px; 
+            margin-bottom: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+            font-size: 1em; 
+            transition: border-color 0.2s ease; 
+        }
+        input:focus, select:focus, textarea:focus { 
+            border-color: #3498db; 
+            outline: none; 
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); 
+        }
+    
+        /* 响应式调整 */
+        @media (max-width: 768px) { 
+            .chart-container { max-width: 100%; } 
+            body { padding: 10px; } 
+            .task-form, .section { padding: 15px; } 
+        }
     </style>
 </head>
 <body>
-    <h1>Deadline管理器</h1>
+    <h1>Time Bandage</h1>
+    
+    <!-- 修改：使用新的容器包裹两个图表 -->
+    <div class="charts-container">
+        <div class="chart-container">
+            <canvas id="taskPriorityChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="lifeLossChart"></canvas>
+        </div>
+    </div>
     
     <div class="task-form">
         <h2>添加新任务</h2>
@@ -30,19 +175,180 @@
         </form>
     </div>
     
-    <h2>代办任务</h2>
-    <ul>
-        {% for task in tasks %}
-        <li>
-            {{ task.name }} - {{ task.deadline }} - 优先级: {{ task.get_priority_display }}
-            <form action="{% url 'delete_task' task.id %}" method="post" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" onclick="return confirm('确定要删除吗？')">删除</button>
-            </form>
-        </li>
-        {% empty %}
-        <li>暂无任务</li>
-        {% endfor %}
-    </ul>
+    <!-- 未完成任务区域 -->
+    <div class="section">
+        <!-- 修改：将"代办任务"改为"待办任务" -->
+        <h2>待办任务</h2>
+        <ul>
+            {% for task in pending_tasks %}
+            <li class="{% if task.priority == 3 %}high-priority{% elif task.priority == 2 %}medium-priority{% else %}low-priority{% endif %}">
+                {{ task.name }} - {{ task.deadline }} - 优先级: {{ task.get_priority_display }}
+                <form action="{% url 'complete_task' task.id %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit">完成</button>
+                </form>
+                <form action="{% url 'delete_task' task.id %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" onclick="return confirm('确定要删除吗？')">删除</button>
+                </form>
+            </li>
+            {% empty %}
+            <!-- 修改：将"暂无代办任务"改为"暂无待办任务" -->
+            <li>暂无待办任务</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <!-- 新增：逾期任务区域 -->
+    <div class="section">
+        <h2>逾期任务</h2>
+        <ul>
+            {% for task in overdue_tasks %}
+            <li class="overdue-task">
+                <span class="overdue-text">⚠️ {{ task.name }}</span> - 截止日期: {{ task.deadline|date:"Y-m-d H:i" }} 
+                (已逾期: {{ task.deadline|timesince }})
+                <form action="{% url 'complete_task' task.id %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit">完成</button>
+                </form>
+                <form action="{% url 'delete_task' task.id %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" onclick="return confirm('确定要删除吗？')">删除</button>
+                </form>
+            </li>
+            {% empty %}
+            <li>暂无逾期任务</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <!-- 已完成任务区域 -->
+    <div class="section">
+        <h2>已完成任务</h2>
+        <ul>
+            {% for task in completed_tasks %}
+            <li class="completed-task">
+                {{ task.name }} - 截止日期: {{ task.deadline }} - 完成于: {{ task.completed_at|date:"Y-m-d H:i" }}
+                <form action="{% url 'delete_task' task.id %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" onclick="return confirm('确定要删除吗？')">删除</button>
+                </form>
+            </li>
+            {% empty %}
+            <li>暂无已完成任务</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <!-- 新增：图表初始化脚本 -->
+    <script>
+        // 获取统计数据
+        const priorityCounts = {
+            high: {{ priority_counts.high }},
+            medium: {{ priority_counts.medium }},
+            low: {{ priority_counts.low }}
+        };
+        
+        // 创建图表
+        const ctx = document.getElementById('taskPriorityChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['高优先级', '中优先级', '低优先级'],
+                datasets: [{
+                    data: [priorityCounts.high, priorityCounts.medium, priorityCounts.low],
+                    backgroundColor: ['#ff4444', '#ffdd44', '#44dd44'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // 新增：允许调整宽高比
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '任务优先级分布',
+                        font: {
+                            size: 14 // 减小标题字体大小
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 新增：生命损失图表
+        const lifeLossCtx = document.getElementById('lifeLossChart').getContext('2d');
+        new Chart(lifeLossCtx, {
+            type: 'bar',
+            data: {
+                labels: ['拖延损失'],
+                datasets: [{
+                    label: '相当于损失的睡眠时间',
+                    data: [{{ lost_life_hours }}],
+                    backgroundColor: '#ff6b6b',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '小时'
+                        },
+                        ticks: {
+                            precision: 1
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '拖延损失统计',
+                        font: {
+                            size: 16,
+                            weight: 'normal',
+                            family: 'Segoe UI'
+                        },
+                        padding: {top: 10, bottom: 20}
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+    
+    <script>
+        // 添加任务表单提交动画
+        document.querySelector('.task-form form').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '保存中...';
+        
+            // 模拟加载状态（实际项目中可移除）
+            setTimeout(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }, 800);
+        });
+    
+        // 任务项悬停效果增强
+        document.querySelectorAll('.task').forEach(task => {
+            task.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px)';
+                this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+            });
+            task.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+            });
+        });
+    </script>
 </body>
 </html>
