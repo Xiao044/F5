@@ -224,8 +224,10 @@
             </div>
 
            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+
+
     <!-- 总任务卡片 -->
-    <a href="/task_detail/" class="relative p-6 bg-white shadow-card rounded-lg hover:shadow-card-hover transition-shadow">
+    <a href="/task_detail/" class="relative p-6 bg-white shadow-card rounded-lg hover:shadow-card-hover transition-shadow cursor-pointer">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-dark-3 text-sm">总任务</p>
@@ -240,21 +242,115 @@
         </div>
     </a>
 
-    <!-- 进行中任务卡片 -->
-    <div class="relative p-6 bg-white shadow-card rounded-lg hover:shadow-card-hover transition-shadow">
-        <div class="flex items-start justify-between">
-            <div>
-                <p class="text-dark-3 text-sm">进行中</p>
-                <h3 class="text-2xl font-bold mt-1">{{ pending_tasks|length }}</h3>
-                <p class="text-danger text-xs mt-2 flex items-center">
-                    <i class="fa fa-arrow-down mr-1"></i> 比上周减少 5%
-                </p>
-            </div>
-            <div class="h-12 w-12 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
-                <i class="fa fa-spinner text-xl"></i>
+<!-- 进行中任务卡片 -->
+<div class="relative p-6 bg-white shadow-card rounded-lg hover:shadow-card-hover transition-shadow cursor-pointer" id="inProgressCard">
+    <div class="flex items-start justify-between">
+        <div>
+            <p class="text-dark-3 text-sm">进行中</p>
+            <h3 class="text-2xl font-bold mt-1">4</h3>
+            <p class="text-danger text-xs mt-2 flex items-center">
+                <i class="fa fa-arrow-down mr-1"></i> 比上周减少 5%
+            </p>
+        </div>
+        <div class="h-12 w-12 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+            <i class="fa fa-spinner text-xl"></i>
+        </div>
+    </div>
+</div>
+
+
+<!-- 进行中任务弹窗 -->
+<div id="inProgressModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center animate-fade-in">
+    <div class="bg-white rounded-xl shadow-dropdown w-full max-w-md mx-4 animate-slide-up">
+        <div class="p-5 border-b border-light-2 flex justify-between items-center">
+            <h4 class="font-semibold text-dark text-lg">进行中任务详情</h4>
+            <button id="closeInProgressModal" class="text-dark-3 hover:text-danger transition-colors">
+                <i class="fa fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="p-5">
+            <div class="space-y-4">
+                <!-- 任务列表内容 -->
+                <h4 class="font-medium text-dark">待办任务</h4>
+                <div class="max-h-[500px] overflow-y-auto space-y-3" id="taskList">
+                    {% for task in pending_tasks %}
+                    <div class="p-3 bg-light-1 rounded-lg border border-light-2 hover:border-primary/30 transition-colors">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-medium text-dark">{{ task.name }}</h4>
+                            <span class="text-xs {% if task.priority == 3 %}bg-danger/10 text-danger{% elif task.priority == 2 %}bg-warning/10 text-warning{% else %}bg-success/10 text-success{% endif %} px-2 py-1 rounded-full">
+                                {{ task.get_priority_display }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-dark-3 mb-3 line-clamp-2">{{ task.description|default:"无描述" }}</p>
+                        <div class="text-xs text-dark-3 mb-3">
+                            <i class="fa fa-clock-o mr-1"></i> 截止: {{ task.deadline|date:"Y-m-d H:i" }}
+                        </div>
+                        <div class="flex space-x-2">
+                            <form action="{% url 'complete_task' task.id %}" method="post" class="flex-1">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full bg-success hover:bg-success/90 text-white text-sm py-2 rounded-lg transition-colors">
+                                    <i class="fa fa-check mr-1"></i> 完成
+                                </button>
+                            </form>
+                            <form action="{% url 'delete_task' task.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" onclick="return confirm('确定要删除吗？')" class="bg-light-2 hover:bg-light-3 text-dark-3 text-sm py-2 px-3 rounded-lg transition-colors">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-10 text-dark-3">
+                        <i class="fa fa-inbox text-3xl mb-2 opacity-50"></i>
+                        <p>暂无待办任务</p>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
+</div>
+
+
+
+
+<script>
+// 获取弹窗和按钮
+const inProgressCard = document.getElementById('inProgressCard');
+const inProgressModal = document.getElementById('inProgressModal');
+const closeInProgressModal = document.getElementById('closeInProgressModal');
+
+// 点击进行中任务卡片时显示弹窗
+inProgressCard.addEventListener('click', () => {
+    inProgressModal.classList.remove('hidden');  // 显示弹窗
+    document.body.style.overflow = 'hidden';  // 禁止背景滚动
+});
+
+// 点击关闭按钮时隐藏弹窗
+closeInProgressModal.addEventListener('click', () => {
+    inProgressModal.classList.add('hidden');  // 隐藏弹窗
+    document.body.style.overflow = '';  // 恢复背景滚动
+});
+
+// 点击弹窗外部时隐藏弹窗
+inProgressModal.addEventListener('click', (e) => {
+    if (e.target === inProgressModal) {
+        inProgressModal.classList.add('hidden');  // 隐藏弹窗
+        document.body.style.overflow = '';  // 恢复背景滚动
+    }
+});
+
+// 按ESC键关闭弹窗
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !inProgressModal.classList.contains('hidden')) {
+        inProgressModal.classList.add('hidden');  // 隐藏弹窗
+        document.body.style.overflow = '';  // 恢复背景滚动
+    }
+});
+</script>
+
+        
 
     <!-- 已完成任务卡片 -->
     <div class="relative p-6 bg-white shadow-card rounded-lg hover:shadow-card-hover transition-shadow">
