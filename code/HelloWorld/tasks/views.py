@@ -10,6 +10,24 @@ def calculate_percentage_change(current_count, last_count):
         return ((current_count - last_count) / last_count) * 100
     return 0
 
+# 计算逾期任务的总数
+def calculate_total_delay_count(overdue_tasks):
+    return len(overdue_tasks)
+
+# 计算逾期任务的生命损失小时数
+def calculate_lost_life_hours(overdue_tasks, now):
+    total_lost_life_seconds = 0
+    for task in overdue_tasks:
+        delay = now - task.deadline
+        total_lost_life_seconds += delay.total_seconds() / 10  # 拖延时间的1/10
+    return round(total_lost_life_seconds / 3600, 1)
+
+# 计算效率损失百分比
+def calculate_efficiency_loss_percentage(total_tasks, total_lost_life_seconds):
+    total_time_seconds = total_tasks * 3600  # 假设每个任务的正常工作时长为1小时
+    efficiency_loss_percentage = (total_lost_life_seconds / total_time_seconds) * 100 if total_time_seconds else 0
+    return round(efficiency_loss_percentage, 2)
+
 # 任务列表视图：展示任务创建表单和任务列表
 def task_list(request):
     if request.method == 'POST':
@@ -44,21 +62,27 @@ def task_list(request):
     completed_tasks_change_percentage = calculate_percentage_change(current_completed_tasks, last_completed_tasks)
     overdue_tasks_change_percentage = calculate_percentage_change(current_overdue_tasks, last_overdue_tasks)
 
-    # 获取高、中、低优先级任务的数量
-    pending_tasks = Task.objects.filter(is_completed=False, deadline__gte=now)
+    # 获取逾期任务列表
     overdue_tasks = Task.objects.filter(is_completed=False, deadline__lt=now).order_by('deadline')
-    completed_tasks = Task.objects.filter(is_completed=True).order_by('-completed_at')
 
-    # 计算逾期任务的生命损失时间（拖延时间的1/10）
+    # 计算逾期任务数量和生命损失小时数
+    total_delay_count = calculate_total_delay_count(overdue_tasks)
+    lost_life_hours = calculate_lost_life_hours(overdue_tasks, now)
+
+    # 计算逾期任务的效率损失百分比
     total_lost_life_seconds = 0
     for task in overdue_tasks:
         delay = now - task.deadline
-        total_lost_life_seconds += delay.total_seconds() / 10  # 拖延时间的1/10
-    
-    # 转换为小时（保留1位小数）
-    lost_life_hours = round(total_lost_life_seconds / 3600, 1)
+        total_lost_life_seconds += delay.total_seconds() / 10
 
-    # 获取高、中、低优先级任务的数量
+    total_tasks = Task.objects.filter(is_completed=False).count() + Task.objects.filter(is_completed=True).count()
+    efficiency_loss_percentage = calculate_efficiency_loss_percentage(total_tasks, total_lost_life_seconds)
+
+    # 获取其他任务信息
+    pending_tasks = Task.objects.filter(is_completed=False, deadline__gte=now)
+    completed_tasks = Task.objects.filter(is_completed=True).order_by('-completed_at')
+
+    # 计算高、中、低优先级任务数量
     high_count = pending_tasks.filter(priority=3).count()
     medium_count = pending_tasks.filter(priority=2).count()
     low_count = pending_tasks.filter(priority=1).count()
@@ -66,12 +90,11 @@ def task_list(request):
     # 计算任务的总数量
     total_tasks = pending_tasks.count() + overdue_tasks.count() + completed_tasks.count()
 
-    # 计算每个优先级任务的比例
+    # 任务优先级分配建议
     high_priority_ratio = (high_count / total_tasks) * 100 if total_tasks else 0
     medium_priority_ratio = (medium_count / total_tasks) * 100 if total_tasks else 0
     low_priority_ratio = (low_count / total_tasks) * 100 if total_tasks else 0
 
-    # 任务优先级分配建议
     high_priority_advice = f"高优先级任务占 {high_priority_ratio:.2f}%，这些任务通常最紧急且最重要，建议优先处理。"
     medium_priority_advice = f"中优先级任务占 {medium_priority_ratio:.2f}%，这些任务可以在完成高优先级任务后进行处理。"
     low_priority_advice = f"低优先级任务占 {low_priority_ratio:.2f}%，这些任务可以在空闲时间或高优先级任务完成后处理。"
@@ -83,7 +106,7 @@ def task_list(request):
         'low': low_count
     }
 
-    # 计算任务的变化文本
+    # 计算任务变化文本
     def get_change_text(change_percentage):
         if change_percentage > 0:
             return f"比上周增长 {change_percentage:.2f}%"
@@ -99,10 +122,11 @@ def task_list(request):
         'completed_tasks': completed_tasks,
         'priority_counts': priority_counts,
         'lost_life_hours': lost_life_hours,  # 传递生命损失数据
+        'efficiency_loss_percentage': efficiency_loss_percentage,  # 传递效率损失数据
         'high_priority_advice': high_priority_advice,
         'medium_priority_advice': medium_priority_advice,
         'low_priority_advice': low_priority_advice,
-        'total_tasks': total_tasks,
+        'total_delay_count': total_delay_count,  # 传递拖延次数
         'total_tasks_change_text': get_change_text(total_tasks_change_percentage),
         'in_progress_tasks_change_text': get_change_text(in_progress_tasks_change_percentage),
         'completed_tasks_change_text': get_change_text(completed_tasks_change_percentage),
