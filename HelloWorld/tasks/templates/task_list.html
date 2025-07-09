@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deadline管理器</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .task-form { background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin-bottom: 30px; }
+        .task { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+        .high-priority { border-left: 4px solid #ff4444; }
+        .medium-priority { border-left: 4px solid #ffdd44; }
+        .low-priority { border-left: 4px solid #44dd44; }
+        .task h3 { margin-top: 0; }
+        .task .deadline { color: #666; font-size: 0.9em; }
+        .priority { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.8em; color: white; }
+        .priority-high { background-color: #ff4444; }
+        .priority-medium { background-color: #ffdd44; color: black; }
+        .priority-low { background-color: #44dd44; }
+    </style>
+</head>
+<body>
+    <h1>Deadline管理器</h1>
+    
+    <div class="task-form">
+        <h2>添加新任务</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">保存任务</button>
+        </form>
+    </div>
+    
+    <h2>代办任务</h2>
+    <ul>
+        {% for task in tasks %}
+        <li>
+            {{ task.name }} - {{ task.deadline }} - 优先级: {{ task.get_priority_display }}
+            <form action="{% url 'delete_task' task.id %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" onclick="return confirm('确定要删除吗？')">删除</button>
+            </form>
+        </li>
+        {% empty %}
+        <li>暂无任务</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
