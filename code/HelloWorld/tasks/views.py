@@ -38,7 +38,6 @@ def task_list(request):
     
     # 计算任务的总数量
     total_tasks = pending_tasks.count() + overdue_tasks.count() + completed_tasks.count()
-
     
     # 计算每个优先级任务的比例
     high_priority_ratio = (high_count / total_tasks) * 100 if total_tasks else 0
@@ -67,7 +66,7 @@ def task_list(request):
         'high_priority_advice': high_priority_advice,
         'medium_priority_advice': medium_priority_advice,
         'low_priority_advice': low_priority_advice,
-        'total_tasks': total_tasks 
+        'total_tasks':total_tasks
     })
 
 # 添加任务视图：显示任务添加表单并处理提交
