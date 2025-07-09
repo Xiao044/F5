@@ -157,45 +157,45 @@
             <nav class="flex-1 py-4 px-2">
                 <ul class="space-y-1">
                     <li>
-                        <a href="主界面.html" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
+                        <a href="{% url 'main_page' %}" class="flex items-center px-2 py-3 rounded-lg bg-primary/10 text-primary">
                             <i class="fa fa-calendar-check-o text-lg w-8 text-center"></i>
                             <span class="hidden md:inline ml-2 font-medium">任务看板</span>
                         </a>
                     </li>
                     <li>
-                        <a href="聊天助手.html" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
+                        <a href="{% url 'chat_assistant' %}" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
                             <i class="fa fa-comment-o text-lg w-8 text-center"></i>
                             <span class="hidden md:inline ml-2">聊天助手</span>
                         </a>
                     </li>
                     <li>
-                        <a href="数据统计.html" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
+                        <a href="{% url 'data_statistics' %}" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
                             <i class="fa fa-bar-chart text-lg w-8 text-center"></i>
                             <span class="hidden md:inline ml-2">数据统计</span>
                         </a>
                     </li>
                     <li>
-                        <a href="团队协作.html" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
+                        <a href="{% url 'team_collaboration' %}" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
                             <i class="fa fa-users text-lg w-8 text-center"></i>
                             <span class="hidden md:inline ml-2">团队协作</span>
                         </a>
                     </li>
-                    
+
                     <!-- 社交功能导航项 -->
                     <li>
-                        <a href="学习搭档.html" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
+                        <a href="{% url 'study_partner' %}" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
                             <i class="fa fa-handshake-o text-lg w-8 text-center"></i>
                             <span class="hidden md:inline ml-2">学习搭档</span>
                         </a>
                     </li>
                     <li>
-                        <a href="排行榜.html" class="flex items-center px-2 py-3 rounded-lg bg-primary/10 text-primary">
+                        <a href="#" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
                             <i class="fa fa-trophy text-lg w-8 text-center"></i>
                             <span class="hidden md:inline ml-2">排行榜</span>
                         </a>
                     </li>
                     <li>
-                        <a href="任务广场.html" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
+                        <a href="{% url 'task_square' %}" class="flex items-center px-2 py-3 rounded-lg text-dark-2 hover:bg-light-1 transition-colors">
                             <i class="fa fa-compass text-lg w-8 text-center"></i>
                             <span class="hidden md:inline ml-2">任务广场</span>
                         </a>
@@ -246,10 +246,10 @@
             </nav>
             
             <div class="p-4 border-t border-light-2 mt-auto">
-                <button id="addTaskBtn" class="w-full bg-primary hover:bg-primary/90 text-white rounded-lg py-3 flex items-center justify-center transition-colors" style="display: flex !important;" onclick="window.location.href='添加任务.html'">
-                    <i class="fa fa-plus mr-2"></i>
-                    <span class="hidden md:inline">添加任务</span>
-                </button>
+                <a id="addTaskBtn" href="{% url 'add_task' %}" class="w-full bg-primary hover:bg-primary/90 text-white rounded-lg py-3 flex items-center justify-center transition-colors">
+    <i class="fa fa-plus mr-2"></i>
+    <span class="hidden md:inline">添加任务</span>
+</a>
             </div>
         </aside>
         
