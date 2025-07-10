@@ -127,6 +127,8 @@ def task_list(request):
         'medium_priority_advice': medium_priority_advice,
         'low_priority_advice': low_priority_advice,
         'total_delay_count': total_delay_count,  # 传递拖延次数
+        'total_tasks': total_tasks,  # 传递总任务数
+        'total_tasks_change_percentage': total_tasks_change_percentage,  # 传递总任务变化百分比
         'total_tasks_change_text': get_change_text(total_tasks_change_percentage),
         'in_progress_tasks_change_text': get_change_text(in_progress_tasks_change_percentage),
         'completed_tasks_change_text': get_change_text(completed_tasks_change_percentage),
